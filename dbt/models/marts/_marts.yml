@@ -1,0 +1,81 @@
+version: 2
+
+models:
+  - name: mart_route_card
+    description: >
+      Monthly market corridor. Grain is month, origin, destination, body group
+      and weight category. Month comes from price_dates, not loading_date.
+      MoM and YoY use the calendar neighbour only.
+    columns:
+      - name: price_month
+        tests: [not_null]
+      - name: body_group
+        tests: [not_null]
+      - name: reliability_level
+        tests:
+          - accepted_values:
+              values: ["HIGH", "MEDIUM", "LOW_DATA"]
+      - name: trips_count
+        tests: [not_null]
+
+unit_tests:
+  - name: mom_ignores_a_missing_calendar_month
+    model: mart_route_card
+    overrides:
+      vars:
+        as_of: "2026-10-26"
+    given:
+      - input: ref('int_route_agg')
+        rows:
+          - price_month: "2026-08-01"
+            loading_city_gcid: 1001
+            unloading_city_gcid: 1003
+            body_group: Тент
+            weight_category: FTL
+            trips_count: 40
+            carriers_count: 6
+            p25_trip: 80
+            median_trip: 100
+            p75_trip: 120
+            avg_trip: 100
+            p25_km: 1
+            median_km: 2
+            p75_km: 3
+            cv_rate: 0.1
+          - price_month: "2026-10-01"
+            loading_city_gcid: 1001
+            unloading_city_gcid: 1003
+            body_group: Тент
+            weight_category: FTL
+            trips_count: 12
+            carriers_count: 2
+            p25_trip: 90
+            median_trip: 110
+            p75_trip: 130
+            avg_trip: 110
+            p25_km: 1
+            median_km: 2
+            p75_km: 3
+            cv_rate: 0.1
+      - input: ref('dim_city')
+        rows:
+          - gc_id: 1001
+            city_id: 1
+            city_name: Москва
+            region_name: г. Москва
+            latitude: 55.7
+            longitude: 37.6
+          - gc_id: 1003
+            city_id: 3
+            city_name: Казань
+            region_name: Республика Татарстан
+            latitude: 55.8
+            longitude: 49.1
+    expect:
+      rows:
+        - price_month: "2026-08-01"
+          mom_pct: null
+          reliability_level: MEDIUM
+        - price_month: "2026-10-01"
+          mom_pct: null
+          reliability_level: MEDIUM

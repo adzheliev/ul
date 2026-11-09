@@ -1,0 +1,30 @@
+name: smartlogistics
+version: "1.0.0"
+config-version: 2
+profile: smartlogistics
+model-paths: ["models"]
+macro-paths: ["macros"]
+test-paths: ["tests"]
+clean-targets: ["target", "dbt_packages"]
+
+vars:
+  as_of: "2026-10-26"
+  high_min_trips: 30
+  high_min_carriers: 5
+  high_max_age_days: 30
+  medium_min_trips: 10
+
+models:
+  smartlogistics:
+    staging:
+      +materialized: view
+      +schema: staging
+    intermediate:
+      +materialized: view
+      +schema: intermediate
+    core:
+      +materialized: table
+      +schema: core
+    marts:
+      +materialized: table
+      +schema: mart

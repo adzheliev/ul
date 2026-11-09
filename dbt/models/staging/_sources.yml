@@ -1,0 +1,27 @@
+version: 2
+
+sources:
+  - name: raw
+    schema: raw
+    description: Landing slice. Facts are replaced per loading-date window.
+    tables:
+      - name: prices
+        description: Source prices for loaded windows, including price_group_id for audit only.
+        columns:
+          - name: id
+            tests: [unique, not_null]
+      - name: cities
+      - name: body_types
+      - name: exchange_rates
+      - name: price_body_types
+      - name: price_dates
+  - name: dq
+    schema: dq
+    description: Dead-letter and audit. Core anti-joins this schema and does not enrich from it.
+    tables:
+      - name: quarantine_prices
+        columns:
+          - name: source_price_id
+            tests: [not_null]
+          - name: reason_code
+            tests: [not_null]

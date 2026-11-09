@@ -1,0 +1,33 @@
+version: 2
+
+models:
+  - name: int_recomputed_outlier
+    description: >
+      Extra outlier flag for accepted facts. Groups of price_group_id with at
+      least four rows. Tukey 1.5 IQR on raw price, or P5–P95 on raw price per
+      kilometre. Does not replace outlier_mark and is not a model feature.
+      Rows in smaller groups are absent; callers treat absence as false.
+
+unit_tests:
+  - name: km_tails_are_marked_and_small_groups_are_absent
+    model: int_recomputed_outlier
+    given:
+      - input: source('raw', 'prices')
+        rows:
+          - {id: 1, is_fact: true, price_group_id: 10, price: 10, distance: 100}
+          - {id: 2, is_fact: true, price_group_id: 10, price: 20, distance: 100}
+          - {id: 3, is_fact: true, price_group_id: 10, price: 30, distance: 100}
+          - {id: 4, is_fact: true, price_group_id: 10, price: 40, distance: 100}
+          - {id: 5, is_fact: true, price_group_id: 20, price: 1000, distance: 10}
+          - {id: 6, is_fact: true, price_group_id: 20, price: 1100, distance: 10}
+          - {id: 7, is_fact: true, price_group_id: 20, price: 9000, distance: 10}
+          - {id: 8, is_fact: false, price_group_id: 10, price: 1, distance: 1}
+      - input: source('dq', 'quarantine_prices')
+        rows:
+          - {source_price_id: 99, reason_code: NON_POSITIVE_PRICE}
+    expect:
+      rows:
+        - {price_id: 1, recomputed_outlier: true}
+        - {price_id: 2, recomputed_outlier: false}
+        - {price_id: 3, recomputed_outlier: false}
+        - {price_id: 4, recomputed_outlier: true}

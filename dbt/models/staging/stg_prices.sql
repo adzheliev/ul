@@ -1,0 +1,22 @@
+select
+    id as price_id,
+    loading_date,
+    end_loading_date,
+    loading_city_gcid,
+    unloading_city_gcid,
+    distance,
+    total_weight,
+    total_volume,
+    body_type,
+    price,
+    currency_code,
+    complex,
+    price_type,
+    is_fact,
+    nearest_rate_date,
+    outlier_mark,
+    weight_category,
+    volume_category,
+    organization_id,
+    created_at
+from {{ source('raw', 'prices') }}
