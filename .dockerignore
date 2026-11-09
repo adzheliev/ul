@@ -1,0 +1,12 @@
+.venv/
+.git/
+.ruff_cache/
+.pytest_cache/
+**/__pycache__/
+**/*.pyc
+artifacts/
+dbt/target/
+dbt/logs/
+graphify-out/
+*.md
+!README.md
